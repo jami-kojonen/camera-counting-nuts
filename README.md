@@ -1,8 +1,8 @@
-# Applying EEG Data to Machine Learning, Part 3
+# Counting Metric Nuts on a Conveyor Belt with OpenMV Cam RT-1062 and FOMO
 
 ## Intro
 
-This third and final tutorial in the series about Machine Learning (ML) and EEG-data, walks through how you can control a small mobile robot purely with your brain waves! This concept can be used for entertainment purposes, but migh also make a big difference for persons unable to use any other method to control external devices such as wheelchairs, televisions, etc.
+This tutorial shows how you can use FOMO in Edge Impulse to count different sizes of nuts on a moving conveyor belt. The solution automates the process of detecting and counting objects on a conveyor belt, improving efficiency and reducing manual labor. The real-time visualization provides immediate feedback, allowing operators to monitor and control processes accurately.
 
 While this is a stand-alone tutorial, it is still recommended you check [Part 1](https://docs.edgeimpulse.com/experts/prototype-and-concept-projects/eeg-data-machine-learning-part-1) and [Part 2](https://docs.edgeimpulse.com/experts/prototype-and-concept-projects/eeg-data-machine-learning-part-2) for background information.
 
