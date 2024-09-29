@@ -6,7 +6,7 @@ This tutorial shows how you can use FOMO in Edge Impulse with the OpenMV Cam RT-
 
 While this is a stand-alone tutorial, it is still recommended you check [Part 1](https://docs.edgeimpulse.com/experts/prototype-and-concept-projects/eeg-data-machine-learning-part-1) and [Part 2](https://docs.edgeimpulse.com/experts/prototype-and-concept-projects/eeg-data-machine-learning-part-2) for background information.
 
-![](/Videos/Counting_nuts_with_conveyor belt.gif)
+![](/Videos/Counting_nuts_with_conveyor_belt.gif)
 
 ## Use-case Explanation
 
