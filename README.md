@@ -21,29 +21,36 @@ The OpenMV cameras directly run MicroPython, and in addition to machine learning
 
 ### Components Needed
 
-- In addition to the camera and a conveyor belt, you need a computer to which they are connected. 
-- It is strongly recommended to 3D-print a case for the camera, official STL-files are nowadays found [here](https://grabcad.com/library/openmv-cam-rt1062-v4-case-1), but as they were not available earlier, I forked an earlier version and made some adjustments, resulting in this [STL-file](/Images/OpenMV_RT-1062_case.stl).
+- A supported computer, pretty much anyone with a USB-port for the camera, the Dobot conveyor belt is connected to a Dobot Magician robot, als through USB.
+- I strongly recommend to 3D-print a case for the camera, official STL-files are nowadays found [here](https://grabcad.com/library/openmv-cam-rt1062-v4-case-1), but as they were not available earlier, I forked an earlier version and made some adjustments, resulting in this [STL-file](/Images/OpenMV_RT-1062_case.stl).
+    - I've printed with semitransparent TPU as it's more flexible and as the LED light shines through the case
+    - I recommend to mount the camera to some type of tripod like I did.
 
 
 ![](/Images/OpenMV_RT-1062_case_with_lid.png)
 
 
-- [Interaxon Muse EEG-device](https://choosemuse.com/pages/shop), any "recent" model, my device is from 2018
-- [Parallax Activitybot kit](https://www.parallax.com/product/activitybot-360-robot-kit/)
-- [PING))) Ultrasonic Distance Sensor](https://www.parallax.com/product/ping-ultrasonic-distance-sensor/) or [LaserPING 2m Rangefinder](https://www.parallax.com/product/laserping-2m-rangefinder/)
-    - note: the distance sensor is not strictly needed for this project, it is only used to reverse the robot in case it comes too close to a hinder, but I still recommend to have a distance sensor for other robot projects
-- [Parallax WX ESP8266 WiFi Module – DIP](https://www.parallax.com/product/parallax-wx-esp8266-wifi-module-dip/)
-- Computer: Windows, Mac, Linux, even a Raspberry Pi might work. Only tested on Windows 10.
+### Hardware and Software Configuration
 
-Please note that the components I've used are several years old, and have been replaced with the newer versions linked above. Due to this there's a possibility you'll have to adjust some of the configuration settings, this is of course even more applicable if you use any other brand than Parallax.
+This is pretty straightforward, and by following the same [tutorial](/Images/OpenMV_RT-1062_case.stl) as I did, you'll be up and running in just a few minutes. While the tutorial is for another older OpenMV camera, I found that the steps are the same.
 
+- When it comes to the ```Dataset_Capture_Script.py``` program used to capture images, I wanted the camera to only see the black conveyor belt, hence I played with the ```img.scale``` function until I found the correct coordinates (see code snippet below). I also added lens correction although I'm not sure it makes a difference. Remember to later use exactly same code lines in the inferencing program!
 
-![](/Images/IMG_3338_3.jpg)
+```
+...
+while(True):
+    clock.tick()
+    img = sensor.snapshot()
+    img.scale(x_scale=1.2, roi=(50, 55, 540, 240))
+    
+    # Apply lens correction if you need it.
+    img.lens_corr()
+...
+```
 
-### Hardware Configuration
+- In this tutorial I created a [Python program](/nuts_conveyor/Dobot%20conveyor%20-%20object%20counting.py) for controlling the conveyor belt, showing a live video feed, and visualizing the counting. You can use any programming language or environment as the OpenMV camera is just using the serial terminal to transmit the total count of objects in the frame, followed by each class and its corresponding count. E.g. this string ```"3, M10: 2, M8:1"``` means that 3 nuts were found, 2 M10's and 1 M8.
+    - The live feed
 
-- Assemble the robot, possible distance sensor, and Wi-Fi module according to the instructions distributed py Parallax
-- Before trying to replicate this project, familiarize yourself with the robot and how to program it. An excellent starting point is the [Parallax educational site](https://learn.parallax.com/).
 
 ### Software Configuration
 
