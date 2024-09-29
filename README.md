@@ -2,19 +2,15 @@
 
 ## Intro
 
-This tutorial shows how you can use FOMO in Edge Impulse to count different sizes of nuts on a moving conveyor belt. The solution automates the process of detecting and counting objects on a conveyor belt, improving efficiency and reducing manual labor. The real-time visualization provides immediate feedback, allowing operators to monitor and control processes accurately.
+This tutorial shows how you can use FOMO in Edge Impulse with the OpenMV Cam RT-1062 to count different sizes of nuts on a moving conveyor belt. The solution automates the process of detecting and counting objects on a conveyor belt, improving efficiency and reducing manual labor. The real-time visualization provides immediate feedback, allowing operators to monitor and control processes accurately.
 
 While this is a stand-alone tutorial, it is still recommended you check [Part 1](https://docs.edgeimpulse.com/experts/prototype-and-concept-projects/eeg-data-machine-learning-part-1) and [Part 2](https://docs.edgeimpulse.com/experts/prototype-and-concept-projects/eeg-data-machine-learning-part-2) for background information.
 
-![](/Images/IMG_3329_3.jpg)
+![](/Videos/Counting_nuts_with_conveyor belt.gif)
 
 ## Use-case Explanation
 
-The previous two tutorials showed how you, using EEG-data from a consumer EEG-device, can play simple games or use a computer to communicate with the outer world. This tutorial takes it one step further, showing how you can control a small mobile robot, again by the small electric signals your brain emits. Possible users for this type of solution might be people having none or only limited capabilities to move their limbs (but still have "normal" brain functionality), to control physical devices such as wheelchairs, doors, window blinders, televisions etc. In the video this technology is simply used to bring a cold drink to me.
-
-Previously I used a setup with several devices involved: `EEG-device ==> Mobile Phone (MindMonitor/PythonOSC) ==> Wi-Fi ==> Computer`, and while it as such worked well enough, I discovered that using same concept when introducing yet an additional device (appending `==> Wi-Fi ==> Mobile Robot` in the equation) caused more latency. In practice this resulted in undesirable delays between the desired action and the same action performed. E.g., when trying to turn the robot left, the left turn sometimes happened unacceptable late, and it was difficult to understand if it was a misinterpration of the EEG-data, or something else. 
-
-Due to this behavior, and that I wanted to simplify the setup, I explored if it was possible to get rid of the phone in the equation, thus having this setup `EEG-device ==> Computer ==>  Wi-Fi ==> Mobile Robot`. The phone though used MindMonitor and  PythonOSC to communicate with the computer, but also automatically reduced the raw data to spectral bands, so I had to find a way to replace both the technical communication as well as the spectral functionality. The communication challenge got solved by using the Lab Streaming Layer (LSL) protocol, and the spectral challenge by Edge Impulse helping me to use their Python-code for extracting spectral features. Through this I was successful in removing the phone and getting almost no extra delays at all!
+Counting objects moving on a conveyor belt offers significant advantages for businesses. It enhances inventory management by providing accurate counts that help maintain optimal stock levels, preventing shortages or overstock situations. Additionally, monitoring the count of products ensures quality control, allowing for the detection of defects or missing items, thus upholding product standards.
 
 The hardware used in this project was a Parallax ActivityBot, equipped with XBee Wi-Fi and a Parallax Ping))) Ultrasonic distance sensor. While more or less any Wi-Fi equipped robot - mobile or not - can be used, I've found the Parallax product line to be very reliable and easy to work with. The microcontroller on the robot is a Propeller P1 processor with 8 separate cores and a shared RAM-memory, which is more than enough for this quite simple use case.   
 
