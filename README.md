@@ -67,6 +67,12 @@ The picture shows the following four different sizes I used: **M12, M10, M8, M6*
 
 ## Training and Building the Model
 
+After you've uploaded data to Edge Impulse, the next steps are to set up the ML-project in the platform. It's made so easy so I did not need to use a tutorial, but for a newcomer I warmly recommend this tutorial [Detect objects with FOMO](https://docs.edgeimpulse.com/docs/tutorials/end-to-end-tutorials/object-detection/detect-objects-using-fomo).
+
+I played around with different image sizes, and found the sweet spot to be 180 x 180.
+
+![Nut sizes: M12, M10, M8, M6](/Images/Create_impulse_compressed.png)
+
 ### Creating an Impulse
 
 Again, this is quite straightforward in Edge Impulse, you need to create an impulse by selecting a few parameters. In this project I experimented with a few alternatives, with and without sliding windows, but found out that a sample window of 2 seconds, using Spectral Analysis as processing block, and Classification as learning block was optimal. As there are in practice no memory or latency constraints when using a computer compared to using a microcontroller, there's no need to try to optimize memory usage or processing time.
