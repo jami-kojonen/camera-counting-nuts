@@ -2,23 +2,32 @@
 
 ## Intro
 
-This tutorial shows how you can use FOMO in Edge Impulse with the OpenMV Cam RT-1062 to count different sizes of nuts on a moving conveyor belt. The solution automates the process of detecting and counting objects on a conveyor belt, improving efficiency and reducing manual labor. The real-time visualization provides immediate feedback, allowing operators to monitor and control processes accurately.
+This tutorial shows how you can use FOMO in Edge Impulse with the OpenMV Cam RT-1062 to count different sizes of nuts on a moving conveyor belt.  The solution automates the process of detecting and counting objects on a conveyor belt, improving efficiency and reducing manual labor. The real-time visualization provides immediate feedback, allowing operators to monitor and control processes accurately.
 
-While this is a stand-alone tutorial, it is still recommended you check [Part 1](https://docs.edgeimpulse.com/experts/prototype-and-concept-projects/eeg-data-machine-learning-part-1) and [Part 2](https://docs.edgeimpulse.com/experts/prototype-and-concept-projects/eeg-data-machine-learning-part-2) for background information.
+The hardware used in this project was the aforementioned OpenMV Cam RT-1062, together with a Dobot conveyor belt. The reason for why this camera was chosen, was that it being a very powerful camera with its own microcontroller, and being fully supported by Edge Impulse, it's very easy to get started with. The main steps in this tutorial are collecting data with the camera, training and deploying from Edge Empulse, and finally testing on the moving conveyor belt.
 
-![](/Videos/Counting_nuts_with_conveyor_belt.gif)
+![](/Images/OpenMV_RT-1062_with_case_compressed.jpg)
 
 ## Use-case Explanation
 
 Counting objects moving on a conveyor belt offers significant advantages for businesses. It enhances inventory management by providing accurate counts that help maintain optimal stock levels, preventing shortages or overstock situations. Additionally, monitoring the count of products ensures quality control, allowing for the detection of defects or missing items, thus upholding product standards.
 
-The hardware used in this project was a Parallax ActivityBot, equipped with XBee Wi-Fi and a Parallax Ping))) Ultrasonic distance sensor. While more or less any Wi-Fi equipped robot - mobile or not - can be used, I've found the Parallax product line to be very reliable and easy to work with. The microcontroller on the robot is a Propeller P1 processor with 8 separate cores and a shared RAM-memory, which is more than enough for this quite simple use case.   
+The OpenMV cameras directly run MicroPython, and in addition to machine learning, they also provides more traditional computer vision algorithms. You can read more about the RT-1062 camera [here](https://openmv.io/products/openmv-cam-rt). The conveyor belt chosen in this tutorial was from [Dobot](https://www.amazon.com/DOBOT-Conveyor-Belt-Simplest-Production/dp/B073NXVW1H), but pretty much any belt can be used.
 
+![](/Images/Conveyor_belt_compressed.jpg)
 
 
 ## Components and Hardware/Software Configuration
 
 ### Components Needed
+
+- In addition to the camera and a conveyor belt, you need a computer to which they are connected. 
+- It is strongly recommended to 3D-print a case for the camera, official STL-files are now adays found [here](https://grabcad.com/library/openmv-cam-rt1062-v4-case-1), but as they were not available earlier, I forked an earlier version and made some adjustments.
+
+![](/Images/OpenMV_RT-1062_case.stl)
+
+![](/Images/OpenMV_RT-1062_case_with_lid.png)
+
 
 - [Interaxon Muse EEG-device](https://choosemuse.com/pages/shop), any "recent" model, my device is from 2018
 - [Parallax Activitybot kit](https://www.parallax.com/product/activitybot-360-robot-kit/)
@@ -149,7 +158,7 @@ The results from this project were initially a bit disappointing due to the inco
 
 When trying to control a physical robot, you most probably want to look what it's doing or where it's going. This action, i.e. watching the robot, was though in my case a bit different than when collecting blinks where I only focused my eyes on the computer screen. In practice I noticed that this difference caused some misclassifications when I sat on the floor and watched the robot. A lesson learned from this is to record blinks in different settings and positions to improve the accuracy. Still, the accuracy was good enough so I could control the robot to give me a well deserved cold beverage!
 
-![](/Images/Video.gif)
+![](/Videos/Counting_nuts_with_conveyor_belt.gif)
 
 ## Conclusion
 
