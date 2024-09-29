@@ -22,9 +22,8 @@ The OpenMV cameras directly run MicroPython, and in addition to machine learning
 ### Components Needed
 
 - In addition to the camera and a conveyor belt, you need a computer to which they are connected. 
-- It is strongly recommended to 3D-print a case for the camera, official STL-files are now adays found [here](https://grabcad.com/library/openmv-cam-rt1062-v4-case-1), but as they were not available earlier, I forked an earlier version and made some adjustments.
+- It is strongly recommended to 3D-print a case for the camera, official STL-files are nowadays found [here](https://grabcad.com/library/openmv-cam-rt1062-v4-case-1), but as they were not available earlier, I forked an earlier version and made some adjustments, resulting in this [STL-file](/Images/OpenMV_RT-1062_case.stl).
 
-![](/Images/OpenMV_RT-1062_case.stl)
 
 ![](/Images/OpenMV_RT-1062_case_with_lid.png)
 
