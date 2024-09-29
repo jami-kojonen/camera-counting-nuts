@@ -6,6 +6,8 @@ This tutorial shows how you can use FOMO in Edge Impulse with the OpenMV Cam RT-
 
 The hardware used in this project was the aforementioned OpenMV Cam RT-1062, together with a Dobot conveyor belt. The reason for why this camera was chosen, was that it being a very powerful camera with its own microcontroller, and being fully supported by Edge Impulse, it's very easy to get started with. The main steps in this tutorial are collecting data with the camera, training and deploying from Edge Empulse, and finally testing on the moving conveyor belt.
 
+A video is found [here](https://youtu.be/gKTWJUO_nzo), or a shorter GIF-video at the end of this tutorial
+
 ![](/Images/OpenMV_RT-1062_with_case_compressed.jpg)
 
 ## Use-case Explanation
@@ -32,7 +34,7 @@ The OpenMV cameras directly run MicroPython, and in addition to machine learning
 
 ### Hardware and Software Configuration
 
-This is pretty straightforward, and by following the same [tutorial](/Images/OpenMV_RT-1062_case.stl) as I did, you'll be up and running in just a few minutes. While the tutorial is for another older OpenMV camera, I found that the steps are the same.
+This is pretty straightforward, and by following the same [tutorial](https://docs.edgeimpulse.com/docs/tutorials/end-to-end-tutorials/image-classification/image-classification-openmv) as I did, you'll be up and running in just a few minutes. While the tutorial is for another older OpenMV camera, I found that the steps are the same.
 
 - When it comes to the ```Dataset_Capture_Script.py``` program used to capture images, I wanted the camera to only see the black conveyor belt, hence I played with the ```img.scale``` function until I found the correct coordinates (see code snippet below). I also added lens correction although I'm not sure it makes a difference. Remember to later use exactly same code lines in the inferencing program!
 
@@ -41,75 +43,27 @@ This is pretty straightforward, and by following the same [tutorial](/Images/Ope
 while(True):
     clock.tick()
     img = sensor.snapshot()
-    img.scale(x_scale=1.2, roi=(50, 55, 540, 240))
+    img.scale(x_scale=1.2, roi=(50, 55, 540, 240))     # <<<<======   Results in a resolution of 324 x 222
     
     # Apply lens correction if you need it.
     img.lens_corr()
 ...
 ```
 
-- In this tutorial I created a [Python program](/nuts_conveyor/Dobot%20conveyor%20-%20object%20counting.py) for controlling the conveyor belt, showing a live video feed, and visualizing the counting. You can use any programming language or environment as the OpenMV camera is just using the serial terminal to transmit the total count of objects in the frame, followed by each class and its corresponding count. E.g. this string ```"3, M10: 2, M8:1"``` means that 3 nuts were found, 2 M10's and 1 M8.
-    - The live feed
-
-
-### Software Configuration
-
-- The robot is in this project programmed using [SimpleIDE](https://learn.parallax.com/tutorials/language/propeller-c/propeller-c-set-simpleide) which is an open source programming tool for Propeller C. SimpleIDE is since 2018 no longer maintained, but was still possible to install and use on Win10 when this tutorial was written (June 2023).
-    - You can also use any other language that the Propeller processor family supports as long as you find libraries for the Wi-Fi and distance sensor modules
-    - The program controlling the robot in this project is by purpose very simple, it is just receiving a control code and a direction code (2 bytes) through Wi-Fi and taking actions on the direction code. This makes it easy to adjust for other brands or other type of robots.
-    - Using SimpleIDE, compile and upload [this program](https://github.com/baljo/EEG-Robot/blob/main/Code/EEG-Robot%20-%20receiver%20side.c) to the robot
-        - You'll need to match pin and Wi-Fi settings with your own setup, check the code for pointers
-- Computer
-    - Python 3.x, I've used v3.11
-        - install following Python libraries: tensorflow, muselsl (only used when recording data), pylsl, numpy, nltk, socket, spectral_analysis (this is found from [Edge Impulse GitHub](https://github.com/edgeimpulse/processing-blocks/tree/master/spectral_analysis))
-        - download the [Python-program](https://github.com/baljo/EEG-Robot/blob/main/Code/EEG-robot.py) communicating with the EEG-device and with the robot
-        - around row 13 you'll find the configuration for your XBee IP-address, change this to what your robot's Wi-Fi device is using
-            ```
-                # Network initiation
-                ip='192.168.XXX.YYY'          # Enter IP of your Xbee
-                p=9750                        # Enter the port number for your Xbee
-            ```
-    - BlueMuse or other software able to stream data from Muse EEG headsets via LSL (Lab Streaming Layer)
+- In this tutorial I created a [Python program](/nuts_conveyor/Dobot%20conveyor%20-%20object%20counting.py) for controlling the conveyor belt, showing a live video feed, and visualizing the counting. You can use any programming language or environment, as the OpenMV camera is just using the serial terminal to transmit the total count of objects it found in the frame, followed by each class and its corresponding count. E.g. this string ```"3, M10: 2, M8:1"``` means that 3 nuts were found, 2 M10's and 1 M8.
+    - The live feed in the program needs a separate camera, the OpenMV camera can't be used as its serial port is occupied by transmitting inferencing data. Starting from around row 102 in the program, you'll find the function ```show_video_feed()```, the camera can if needed be changed from 0 to another in ```cap = cv2.VideoCapture(0)```.
 
 
 ## Data Collection Process
 
-In this project I started with the aim of collecting data mainly stemming from the motor cortex in our brains. Thus I collected data when **trying** to move my left hand, when **trying** to move my right hand, and when relaxing. I did though not move any limbs at all, neither did I blink, thus simulating I was paralyzed. I got an accuracy of 88 % as testing result in Edge Impulse, which for this type of project is surprisingly good. 
+The process of capturing and uploading the images is described in the previous mentioned [tutorial](https://docs.edgeimpulse.com/docs/tutorials/end-to-end-tutorials/image-classification/image-classification-openmv).
 
-![](/Images/EI-02_2.jpg)
+For this use case, I suspected beforehand that lighting would play a crucial role, and that one nut might look quite similar to another nut, even if they are of different sizes. To mitigate possible issues, I decided to take pictures with partially different lighting, ending up with approximately 60 pictures per class. 
 
-But as sometimes also happened with the previous two EEG-projects, I found the accuracy in real life to be only satisfactorial, and especially inconsistent with sometimes a very good repeatability, sometimes nothing worked at all. While the reasons for this inconsistent behaviour are not completely clear to me, I later discovered that the place where I usually tested (favorite sofa corner), is affected by electric and/or radio interference. Depended on how I sat, the interference could vary between almost nothing, to a small 'hurricane'. With the previous two projects I used the MindMonitor mobile phone app to secure good signal quality, but as the phone was taken out of the setup in this third project I did at first not think about checking the signal quality. I also believe the MindMonitor app is filtering out some of the interference before compiling the data, so with hindsight this is something I should have thought to do in the Python code. Best is of course to try to minimize external interference by going outdoors...while still using Wi-Fi.
+The picture shows the following four different sizes I used: **M12, M10, M8, M6**
 
-With the above mentioned inconsistencies, I decided to simplify the approach and go back to using eye blinks as they create significant and also visible peaks in the EEG-data. Thus I started to record 30 seconds of data chunks when blinking normally (approx. once per 2 seconds), and similarly when blinking 'harder', almost squeezing my eyes. The normal blinks I labeled 'shallow', the hard blinks 'deep'. Additionally I recorded data when not blinking at all, this serves as a background class. Initially I also recorded data with 'double blinks', i.e. two consecutive blinks, with the aim of using them to signal the robot to stop moving. As it though was difficult to secure that both blinks fitted in same 2 second window, I scrapped that idea.
+![Nut sizes: M12, M10, M8, M6](/Images/nut_sizes_compressed.jpg)
 
-### Record Data
-
-Connect your Muse device to your computer, start BlueMuse, and use this MuseLSL command from a command prompt:
-- muselsl record --duration 60
-    - This records EEG-data to a CSV-file, in this case for 60 seconds.
-    - During this time you should try to blink approximately once per two seconds, as long as you collect many minutes of data in total, it's not a big deal if you blink a bit more frequent. It's anyhow better to sometimes have two blinks in the same 2 second window instead of having none at all, as the latter might be confused with the background class where you are not supposed to blink at all.
-- Rename the CSV-files to e.g. `left.<original file name>.csv` for the 'shallow' blinks, `right.<original file name>.csv` for the 'deep' blinks, and `background.<original file name>.csv` for the background class without blinks.
-- Start with a smaller amount of data, a minute or so per class, and after you've trained the model add more data. In this project I have only 6 minutes of data, but if I would strive for perfection I'd double or triple this amount.
-
-#### Deep Eye Blinks
-
-![](/Images/EI-20_2.jpg)
-
-
-#### Normal Eye Blinks
-
-![](/Images/EI-22_2.jpg)
-
-#### Background Noise (no blinks) 
-
-![](/Images/EI-24_2.jpg)
-
-
-### Upload to Edge Impulse
-
-Use Edge Impulse's CSV Wizard to configure the CSV-file import. This wizard walks you through the process by using one of your recorded files as an example, so it's very easy and straightforward to use. As mentioned before, I've myself used samples of 2 seconds each, and blinked accordingly, but feel free to experiment with smaller or larger samples. Keep in mind though that the larger the sample window is, the longer it will take before the intended action (turn left or right) is taken. You probably don't want to wait 10 seconds after you've asked the robot to turn left before it finally turns!
-
-![](Images/EI-05_2.jpg)
 
 ## Training and Building the Model
 
