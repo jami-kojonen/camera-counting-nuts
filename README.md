@@ -64,70 +64,47 @@ The picture shows the following four different sizes I used: **M12, M10, M8, M6*
 
 ![Nut sizes: M12, M10, M8, M6](/Images/nut_sizes_compressed.jpg)
 
+When it comes to this type of project, counting similar objects but of different sizes, it's very important that the distance from the camera to the objects is same every time! Hence a tripod or similar is a necessity.
+
 
 ## Training and Building the Model
 
 After you've uploaded data to Edge Impulse, the next steps are to set up the ML-project in the platform. It's made so easy so I did not need to use a tutorial, but for a newcomer I warmly recommend this tutorial [Detect objects with FOMO](https://docs.edgeimpulse.com/docs/tutorials/end-to-end-tutorials/object-detection/detect-objects-using-fomo).
 
-I played around with different image sizes, and found the sweet spot to be 180 x 180.
+- I played around with different image sizes, and found the sweet spot to be 180 x 180.
 
-![Nut sizes: M12, M10, M8, M6](/Images/Create_impulse_compressed.png)
+![](/Images/Create_impulse_compressed.png)
 
-### Creating an Impulse
+- In the Image 'Tab' I selected ```Grayscale``` instead of ```RGB``` as the conveyor belt is black and the nuts quite colorless, hence no need to use colors.
+- Start the training process from the Object detection 'Tab', I tried different settings, but found the default ones to be perfect!
+- After a while, depending on the amount of data, you'll get a verdict in form of a F1 score (a mix of precision and recall). If it is unsatisfactory, you need to check your data and most probably add more images. In my case the score was 92 % which was ok for this tutorial, but in a real scenario would need to be improved.
 
-Again, this is quite straightforward in Edge Impulse, you need to create an impulse by selecting a few parameters. In this project I experimented with a few alternatives, with and without sliding windows, but found out that a sample window of 2 seconds, using Spectral Analysis as processing block, and Classification as learning block was optimal. As there are in practice no memory or latency constraints when using a computer compared to using a microcontroller, there's no need to try to optimize memory usage or processing time.
+![](/Images/Object_detection_compressed.png)
 
-![](Images/EI-08.jpg)
 
-### Configuring Spectral Features
-
-Following configuration is what I found to be optimal for this use case. Whenever you change any of these, do remember to change same setting in the Python-program as well.
-- Click on `Save parameters` and in next screen `Generate features`.
-
-![](Images/EI-10.jpg)
-
-### Training the Model
-
-After some experimentation I found an optimal Neural network settings to be 2 dense layers of 20 and 40 neurons each, with a dropout rate of 0.25 to reduce the risk of overfitting the model exactly to the underlying data. As a computer later will run inferencing, there's no need to create an Int8 quantized model. As the results show, the training performance in this case is 100 %.
-
-![](Images/EI-13.jpg)
-
-### Testing the Model
-
-Before deploying the model to the target device, it is strongly recommended that you test it with data it has not seen before. This is where you use the `Model testing` functionality in Edge Impulse. For this purpose Edge Impulse puts by default approximately 20 % of the data aside. Just click on `Classify all` to start the testing.
-
-In this project the test results were quite good with an accuracy of 88 %, so I decided this was good enough to start testing the model in practice. If this were a project to be deployed to end users, the accuracy would probably need to be much higher.   
-
-![](Images/EI-15.jpg)
 
 ## Model Deployment
 
-First part is in this case extremely simple, just head over to `Dashboard` and download the `TensorFlow Lite (float32)` model. This model file should be copied to same directory as where the Python-program is.
+Now it's time to test the model in real life!
 
-![](Images/EI-17.jpg)
+- Head over to the Deployment tab, and search for 'OpenMV'
 
-Second part is to check the Python-program (EEG-robot.py) and secure you have correct configuration:
-- Around row 82 you'll find the below code, change the model_path to the exact name of the file you just downloaded
-    ```
-    # Load the TensorFlow Lite model
-    model_path = "ei-muse-eeg-robot-blinks-classifier-tensorflow-lite-float32-model (1).lite"
-    ```
-- Start the robot, the first time without providing power to the wheel servos, once you have established communication you can provide power to the servos.
-- Run the Python program, as this project is all about controlling an external robot, there's no fancy UI. What though will be shown in the terminal window is the result of the inference, i.e. left, right, or background. Remember, left is a 'normal' blink, right is a 'deep' blink, and background is no blinks at all (= the robot moves straight forward).
-- If everything works as it should (which it sometimes does even the first time), you can now control your robot by blinking!
-    - As there are several devices, programs, libraries etc. involved, there's of course a risk that you'll end up having problems, mainly with device communication or with the model accuracy. As this is neither rocket science or brain surgery, just troubleshoot each issue methodically,    
+![](/Images/Deployment_compressed.png)
+
+- When just testing, and with smaller models like mine, it's ok to use the library option, but for real production usage it's better to build a firmware version.
+- After the build process is completed, follow the instructions for how to deploy the model to the OpenMV camera. With the library option, you just extract the files from the ZIP-file to the camera's memory, while you with the firmware option need to flash the compiled firmware to the camera with help of the OpenMV IDE.
+- When the camera is powered, it automatically runs ```main.py``` from its memory. Ensure this progam has the proper image conversions you used in the capturing phase! 
+- Run the [Python program](/nuts_conveyor/Dobot%20conveyor%20-%20object%20counting.py) or your own version to receive inferencing data from the OpenMV camera. 
+    - Remember that if you want a live video feed, you need to connect a separate camera to your computer
+
 
 
 ## Results
 
-The results from this project were initially a bit disappointing due to the inconsistencies I could not understand the reasons for. As mentioned earlier I needed to lower my ambition level and use blinks instead of hand movement tries. Still, even then the accuracy was sometimes unexpectedly low. First when I discovered that one major culprit was interference, and I found an exact sweet spot where to sit, I was able to achieve good results in a real setting. Now I believe that my initial goal might be easier to achieve when I know how to reduce interference.
-
-When trying to control a physical robot, you most probably want to look what it's doing or where it's going. This action, i.e. watching the robot, was though in my case a bit different than when collecting blinks where I only focused my eyes on the computer screen. In practice I noticed that this difference caused some misclassifications when I sat on the floor and watched the robot. A lesson learned from this is to record blinks in different settings and positions to improve the accuracy. Still, the accuracy was good enough so I could control the robot to give me a well deserved cold beverage!
+The results from this project met the objectives, to be able to count objects with the OpenMV camera, using FOMO. The whole solution is not perfect as the accuracy could be improved by adding more data. The current version is counting all the nuts it identifies, but adding a running total would obviously be beneficial in a production scenario. This needs partially another approach on the Python-side as the conveyor belt would need to be paused, inference run on the camera, before resuming. I tried to implement this, but as the conveyor belt is running completely asynchronously, it is challenging to stop at a given time. As the ML-model itself is technically working perfectly, I decided to leave this improvement for later.
 
 ![](/Videos/Counting_nuts_with_conveyor_belt.gif)
 
 ## Conclusion
 
-The goal of this tutorial was to show how to control a mobile robot using brain waves, and despite the few pitfalls on the road, the goal was achieved. To scale up from this proof of concept level, one would need to take measures to minimize or mitigate electric and radio interference, physically and/or by filtering it out in the software. The physical device being controlled, in this case a mobile robot, also needs to have fail-safe modes so it does not harm others or itself. I actually tried to implement logic on the robot so it would stop if the communication was interupted for a few seconds, but I was not able to get it working reliably. In addition, it would be nice to have a few more commands available, e.g. double-blinking for stopping or starting the robot, triple-blinking for reversing etc. Technically this is quite easy, the major work needs to be done in designing the ML-model and collecting data.
-
-This ends - at least for now - the tutorial series of applying machine learning to EEG-data. While not everything has gone according to initial plans, there has been way more successes than failures. Most satisfying was everything I've learned on the way, and most surprising learning that this concept even is possible with a consumer EEG-device! Luckily I did not listen to one professor telling me it is probably not possible to successfully classify brain waves from the motor cortex with this type of EEG-device!
+The goal of this tutorial was to show how to count objects, using FOMO and the OpenMV Cam RT-1062. As mentioned, the goal was achieved, and while a few technical issues occurred on the conveyor belt side, the overall process was quite straightforward.
