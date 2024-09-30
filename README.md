@@ -70,12 +70,16 @@ When it comes to this type of project, counting similar objects but of different
 
 Below one raw picture of each of the nuts in order of size (M6, M8, M10, M12). As you can see the lighting was not uniform (the black belt is absorbing a lot of light), it's also not that easy to distinguish between M10s and M12s, but in this project the final model outperformed the human model!
 
+**M6**
 ![](/Images/00050.jpg)
 
+**M8**
 ![](/Images/00051.jpg)
 
+**M10**
 ![](/Images/00052.jpg)
 
+**M12**
 ![](/Images/00053.jpg)
 
 ## Training and Building the Model
