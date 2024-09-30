@@ -1,4 +1,4 @@
-# Counting Metric Nuts on a Conveyor Belt with OpenMV Cam RT-1062 and FOMO
+# Counting Metric Nuts on a Conveyor Belt with OpenMV Cam RT-1062 and Edge Impulse FOMO
 
 ## Intro
 
@@ -34,7 +34,9 @@ The OpenMV cameras directly run MicroPython, and in addition to machine learning
 
 ### Hardware and Software Configuration
 
-This is pretty straightforward, and by following the same [tutorial](https://docs.edgeimpulse.com/docs/tutorials/end-to-end-tutorials/image-classification/image-classification-openmv) as I did, you'll be up and running in just a few minutes. While the tutorial is for another older OpenMV camera, I found that the steps are the same.
+In this project the novel FOMO machine learning algorithm developed by Edge Impulse is used. FOMO (Faster Objects, More Objects) brings object detection to highly constrained devices which lets you count multiple objects and find their location in an image in real-time using up to 30x less processing power and memory than MobileNet SSD or YOLOv5. FOMO as a concept is explained more [here](https://docs.edgeimpulse.com/docs/edge-impulse-studio/learning-blocks/object-detection/fomo-object-detection-for-constrained-devices).
+
+By following the same [tutorial](https://docs.edgeimpulse.com/docs/tutorials/end-to-end-tutorials/image-classification/image-classification-openmv) as I did, you'll be technically up and running in just a few minutes. While the tutorial is for another older OpenMV camera, I found that the steps are the same.
 
 - When it comes to the ```Dataset_Capture_Script.py``` program used to capture images, I wanted the camera to only see the black conveyor belt, hence I played with the ```img.scale``` function until I found the correct coordinates (see code snippet below). I also added lens correction although I'm not sure it makes a difference. Remember to later use exactly same code lines in the inferencing program!
 
@@ -56,7 +58,7 @@ while(True):
 
 ## Data Collection Process
 
-The process of capturing and uploading the images is described in the previous mentioned [tutorial](https://docs.edgeimpulse.com/docs/tutorials/end-to-end-tutorials/image-classification/image-classification-openmv).
+The process of capturing and uploading the images is described in the previous mentioned [tutorial](https://docs.edgeimpulse.com/docs/tutorials/end-to-end-tutorials/image-classification/image-classification-openmv). Once data is uploaded, you need to label the objects, I recommend to use the [AI-assisted labeling queue](https://docs.edgeimpulse.com/docs/edge-impulse-studio/data-acquisition/labeling-queue) as it often dramatically speeds up the process.
 
 For this use case, I suspected beforehand that lighting would play a crucial role, and that one nut might look quite similar to another nut, even if they are of different sizes. To mitigate possible issues, I decided to take pictures with partially different lighting, ending up with approximately 60 pictures per class. 
 
@@ -66,6 +68,15 @@ The picture shows the following four different sizes I used: **M12, M10, M8, M6*
 
 When it comes to this type of project, counting similar objects but of different sizes, it's very important that the distance from the camera to the objects is same every time! Hence a tripod or similar is a necessity.
 
+Below one picture of each of the nuts, as you can see the lighting 
+
+![](/Images/50.jpg)
+
+![](/Images/51.jpg)
+
+![](/Images/52.jpg)
+
+![](/Images/53.jpg)
 
 ## Training and Building the Model
 
@@ -107,4 +118,4 @@ The results from this project met the objectives, to be able to count objects wi
 
 ## Conclusion
 
-The goal of this tutorial was to show how to count objects, using FOMO and the OpenMV Cam RT-1062. As mentioned, the goal was achieved, and while a few technical issues occurred on the conveyor belt side, the overall process was quite straightforward.
+The goal of this tutorial was to show how to count objects, using FOMO and the OpenMV Cam RT-1062. As mentioned, the goal was achieved, and while a few technical issues occurred on the conveyor belt side, the overall process was quite straightforward. All the code and files used in this write-up are found from [Github](https://github.com/baljo/count_nuts).
