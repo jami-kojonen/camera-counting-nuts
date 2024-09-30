@@ -2,17 +2,17 @@
 
 ## Intro
 
-This tutorial shows how you can use FOMO in Edge Impulse with the OpenMV Cam RT-1062 to count different sizes of nuts on a moving conveyor belt.  The solution automates the process of detecting and counting objects on a conveyor belt, improving efficiency and reducing manual labor. The real-time visualization provides immediate feedback, allowing operators to monitor and control processes accurately.
+This tutorial shows how you can use FOMO in Edge Impulse with the OpenMV Cam RT-1062 to count different sizes of nuts on a moving conveyor belt. The solution automates the process of detecting and counting objects on a conveyor belt, improving efficiency and reducing manual labor. A real-time visualization provides immediate feedback, allowing you to monitor and control the process accurately.
 
 The hardware used in this project was the aforementioned OpenMV Cam RT-1062, together with a Dobot conveyor belt. The reason for why this camera was chosen, was that it being a very powerful camera with its own microcontroller, and being fully supported by Edge Impulse, it's very easy to get started with. The main steps in this tutorial are collecting data with the camera, training and deploying from Edge Empulse, and finally testing on the moving conveyor belt.
 
-A video is found [here](https://youtu.be/gKTWJUO_nzo), or a shorter GIF-video at the end of this tutorial
+A video is found [here](https://youtu.be/gKTWJUO_nzo), and a shorter GIF-video at the end of this tutorial
 
 ![](/Images/OpenMV_RT-1062_with_case_compressed.jpg)
 
 ## Use-case Explanation
 
-Counting objects moving on a conveyor belt offers significant advantages for businesses. It enhances inventory management by providing accurate counts that help maintain optimal stock levels, preventing shortages or overstock situations. Additionally, monitoring the count of products ensures quality control, allowing for the detection of defects or missing items, thus upholding product standards.
+Counting objects moving on a conveyor belt offers significant advantages for businesses. It enhances inventory management by providing accurate counts that help maintain optimal stock levels, preventing shortages or overstock situations. Additionally, monitoring the count of products ensures quality control, allowing for the detection of defects or missing items, thus upholding product standards. In this project I wanted to learn how a prototype of counting nuts of different sizes can be done, without spending thousands and yet thousands of dollars.
 
 The OpenMV cameras directly run MicroPython, and in addition to machine learning, they also provides more traditional computer vision algorithms. You can read more about the RT-1062 camera [here](https://openmv.io/products/openmv-cam-rt). The conveyor belt chosen in this tutorial was from [Dobot](https://www.amazon.com/DOBOT-Conveyor-Belt-Simplest-Production/dp/B073NXVW1H), but pretty much any belt can be used.
 
@@ -23,7 +23,7 @@ The OpenMV cameras directly run MicroPython, and in addition to machine learning
 
 ### Components Needed
 
-- A supported computer, pretty much anyone with a USB-port for the camera, the Dobot conveyor belt is connected to a Dobot Magician robot, als through USB.
+- A supported computer, pretty much anyone with a USB-port for the camera, the Dobot conveyor belt is connected to a Dobot Magician robot, also through USB.
 - I strongly recommend to 3D-print a case for the camera, official STL-files are nowadays found [here](https://grabcad.com/library/openmv-cam-rt1062-v4-case-1), but as they were not available earlier, I forked an earlier version and made some adjustments, resulting in this [STL-file](/Images/OpenMV_RT-1062_case.stl).
     - I've printed with semitransparent TPU as it's more flexible and as the LED light shines through the case
     - I recommend to mount the camera to some type of tripod like I did.
@@ -122,4 +122,6 @@ The results from this project met the objectives, to be able to count objects wi
 
 ## Conclusion
 
-The goal of this tutorial was to show how to count objects, using FOMO and the OpenMV Cam RT-1062. As mentioned, the goal was achieved, and while a few technical issues occurred on the conveyor belt side, the overall process was quite straightforward. All the code and files used in this write-up are found from [Github](https://github.com/baljo/count_nuts).
+The goal of this tutorial was to show how to count objects, using FOMO and the OpenMV Cam RT-1062. As mentioned, the goal was achieved, and while a few technical issues occurred on the conveyor belt side, the overall process was quite straightforward. 
+
+All the code and files used in this write-up are found from [Github](https://github.com/baljo/count_nuts), the public Edge Impulse project is [here](https://studio.edgeimpulse.com/studio/527570). Feel free to clone the project for your own use case.
