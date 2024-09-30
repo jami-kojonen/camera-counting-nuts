@@ -68,15 +68,15 @@ The picture shows the following four different sizes I used: **M12, M10, M8, M6*
 
 When it comes to this type of project, counting similar objects but of different sizes, it's very important that the distance from the camera to the objects is same every time! Hence a tripod or similar is a necessity.
 
-Below one picture of each of the nuts, as you can see the lighting 
+Below one raw picture of each of the nuts in order of size (M6, M8, M10, M12). As you can see the lighting was not uniform (the black belt is absorbing a lot of light), it's also not that easy to distinguish between M10s and M12s, but in this project the final model outperformed the human model!
 
-![](/Images/50.jpg)
+![](/Images/00050.jpg)
 
-![](/Images/51.jpg)
+![](/Images/00051.jpg)
 
-![](/Images/52.jpg)
+![](/Images/00052.jpg)
 
-![](/Images/53.jpg)
+![](/Images/00053.jpg)
 
 ## Training and Building the Model
 
