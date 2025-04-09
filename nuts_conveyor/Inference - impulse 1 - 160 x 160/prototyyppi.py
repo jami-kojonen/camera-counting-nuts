@@ -3,14 +3,19 @@ import numpy as np
 import tensorflow as tf
 import uuid
 import time
+import os
 
 # Ladataan TFLite-malli
-model_path = "C:/Users/tiitu/github_projects/camera-counting-nuts/nuts_conveyor/Inference - impulse 1 - 160 x 160/trained.tflite"
+here = os.path.dirname(os.path.realpath(__file__))
+model_path = os.path.join(here, "trained.tflite")
+labels_path = os.path.join(here, "labels.txt")
+
+# model_path = "C:/Users/Manni/github_projects/camera-counting-nuts/nuts_conveyor/Inference - impulse 1 - 160 x 160/trained.tflite"
 interpreter = tf.lite.Interpreter(model_path=model_path)
 interpreter.allocate_tensors()
 
 # Ladataan labelit
-with open("C:/Users/tiitu/github_projects/camera-counting-nuts/nuts_conveyor/Inference - impulse 1 - 160 x 160/labels.txt", "r") as f:
+with open(labels_path, "r") as f:
     labels = [line.strip() for line in f.readlines()]
 
 input_details = interpreter.get_input_details()
@@ -33,7 +38,7 @@ nut_classes = ["m6", "m8", "m10", "m12"]
 nut_count = {nut: 0 for nut in nut_classes}
 
 # 🔻 Laskulinjan korkeus (alareuna)
-line_y = 100
+line_y = 300
 
 class TrackedObject:
     def __init__(self, nut_type, position):
