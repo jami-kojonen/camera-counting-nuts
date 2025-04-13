@@ -16,13 +16,14 @@ class on_screen_frame(customtkinter.CTkFrame):
         super().__init__(master)
 
         # values = [m6, m8, m10, m12]
-        self.values = values if values is not None else [0, 0, 0, 0]
+        self.values = values if values is not None else [0, 0, 0, 0, 0]
 
         self.grid_rowconfigure(0, weight=2)
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
         self.grid_rowconfigure(3, weight=1)
         self.grid_rowconfigure(4, weight=1)
+        self.grid_rowconfigure(5, weight=1)
 
         self.grid_columnconfigure(0, weight=1)
 
@@ -37,6 +38,8 @@ class on_screen_frame(customtkinter.CTkFrame):
         self.m10_var.set(f"M10: {self.values[2]}")
         self.m12_var = customtkinter.StringVar()
         self.m12_var.set(f"M12: {self.values[3]}")
+        self.all_sizes_var = customtkinter.StringVar()
+        self.all_sizes_var.set(f"All sizes: {self.values[4]}")
 
         self.m6_label = customtkinter.CTkLabel(self, textvariable=self.m6_var, font=("Arial", 16), corner_radius=6, justify="left")
         self.m6_label.grid(row=1, column=0, padx=10, pady=(10, 0), sticky="ew")
@@ -46,6 +49,8 @@ class on_screen_frame(customtkinter.CTkFrame):
         self.m10_label.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="ew")
         self.m12_label = customtkinter.CTkLabel(self, textvariable=self.m12_var, font=("Arial", 16), corner_radius=6, justify="left")
         self.m12_label.grid(row=4, column=0, padx=10, pady=(10, 0), sticky="ew")
+        self.all_sizes_label = customtkinter.CTkLabel(self, textvariable=self.all_sizes_var, font=("Arial", 16), corner_radius=6, justify="left")
+        self.all_sizes_label.grid(row=5, column=0, padx=10, pady=(10, 0), sticky="ew")
 
 
 
@@ -56,13 +61,14 @@ class totals_frame(customtkinter.CTkFrame):
         super().__init__(master)
 
         # values = [m6, m8, m10, m12]
-        self.values = values if values is not None else [0, 0, 0, 0]
+        self.values = values if values is not None else [0, 0, 0, 0, 0]
 
         self.grid_rowconfigure(0, weight=2)
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
         self.grid_rowconfigure(3, weight=1)
         self.grid_rowconfigure(4, weight=1)
+        self.grid_rowconfigure(5, weight=1)
 
         self.grid_columnconfigure(0, weight=1)
 
@@ -77,6 +83,8 @@ class totals_frame(customtkinter.CTkFrame):
         self.m10_var.set(f"M10: {self.values[2]}")
         self.m12_var = customtkinter.StringVar()
         self.m12_var.set(f"M12: {self.values[3]}")
+        self.all_sizes_var = customtkinter.StringVar()
+        self.all_sizes_var.set(f"All sizes: {self.values[4]}")
 
         self.m6_label = customtkinter.CTkLabel(self, textvariable=self.m6_var, font=("Arial", 16), corner_radius=6, justify="left")
         self.m6_label.grid(row=1, column=0, padx=10, pady=(10, 0), sticky="ew")
@@ -86,6 +94,8 @@ class totals_frame(customtkinter.CTkFrame):
         self.m10_label.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="ew")
         self.m12_label = customtkinter.CTkLabel(self, textvariable=self.m12_var, font=("Arial", 16), corner_radius=6, justify="left")
         self.m12_label.grid(row=4, column=0, padx=10, pady=(10, 0), sticky="ew")
+        self.all_sizes_label = customtkinter.CTkLabel(self, textvariable=self.all_sizes_var, font=("Arial", 16), corner_radius=6, justify="left")
+        self.all_sizes_label.grid(row=5, column=0, padx=10, pady=(10, 0), sticky="ew")
 
 
 class button_frame(customtkinter.CTkFrame):
@@ -133,19 +143,21 @@ class App(customtkinter.CTk):
     def button_callback(self):
         # This method will be called when the button is pressed
         # Reset values to 0
-        zero_values = [0, 0, 0, 0]
+        zero_values = [0, 0, 0, 0, 0]
 
         # Update on_screen_frame values
         self.on_screen_frame.m6_var.set("M6: 0")
         self.on_screen_frame.m8_var.set("M8: 0")
         self.on_screen_frame.m10_var.set("M10: 0")
         self.on_screen_frame.m12_var.set("M12: 0")
+        self.on_screen_frame.all_sizes_var.set("All sizes: 0")
 
         # Update totals_frame values
         self.totals_frame.m6_var.set("M6: 0")
         self.totals_frame.m8_var.set("M8: 0")
         self.totals_frame.m10_var.set("M10: 0")
         self.totals_frame.m12_var.set("M12: 0")
+        self.totals_frame.all_sizes_var.set("All sizes: 0")
 
         # (Optional) update internal values too if needed
         self.on_screen_frame.values = zero_values
@@ -155,8 +167,8 @@ class App(customtkinter.CTk):
         self.total_values = zero_values
 
 
-current_values = [1, 2, 44, 2]  # Example current values
-total_values = [10, 20, 30, 40]  # Example total values
+current_values = [1, 2, 44, 2, 10]  # Example current values
+total_values = [10, 20, 30, 40, -2]  # Example total values
 
 app = App(current_values=current_values, total_values=total_values)
 app.mainloop()
