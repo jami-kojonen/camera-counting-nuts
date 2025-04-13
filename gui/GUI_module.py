@@ -117,8 +117,8 @@ class GUI(customtkinter.CTk):
         self.geometry("800x600")
         self.configure(bg="#2E2E2E")
 
-        self.current_values = current_values if current_values is not None else [0, 0, 0, 0]
-        self.total_values = total_values if total_values is not None else [0, 0, 0, 0]
+        self.current_values = current_values if current_values is not None else [0, 0, 0, 0, 0]
+        self.total_values = total_values if total_values is not None else [0, 0, 0, 0, 0]
 
         # Grid layout
         self.grid_rowconfigure(0, weight=1)
@@ -181,8 +181,8 @@ class GUI(customtkinter.CTk):
         self.totals_frame.all_sizes_var.set(f"All sizes: {total_values[4]}")
 
 
-# current_values = [1, 2, 44, 2, 10]  # Example current values
-# total_values = [10, 20, 30, 40, -2]  # Example total values
+#current_values = [1, 2, 44, 2, 10]  # Example current values
+#total_values = [10, 20, 30, 40, -2]  # Example total values
 
-# app = App(current_values=current_values, total_values=total_values)
-# app.mainloop()
+#app = GUI(current_values=current_values, total_values=total_values)
+#app.mainloop()
