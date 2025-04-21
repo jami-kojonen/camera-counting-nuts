@@ -1,3 +1,4 @@
+import threading
 import customtkinter
 
 class title_frame(customtkinter.CTkFrame):
@@ -117,6 +118,9 @@ class GUI(customtkinter.CTk):
         self.geometry("800x600")
         self.configure(bg="#2E2E2E")
 
+        # Create an event for reset functionality
+        self.reset_event = threading.Event()
+
         self.current_values = current_values if current_values is not None else [0, 0, 0, 0, 0]
         self.total_values = total_values if total_values is not None else [0, 0, 0, 0, 0]
 
@@ -141,30 +145,18 @@ class GUI(customtkinter.CTk):
         self.totals_frame.grid(row=1, column=1, sticky="nsew")
 
     def button_callback(self):
-        # This method will be called when the button is pressed
-        # Reset values to 0
-        zero_values = [0, 0, 0, 0, 0]
+        # This method sets the reset event
+        self.reset_event.set()
 
-        # Update on_screen_frame values
-        self.on_screen_frame.m6_var.set("M6: 0")
-        self.on_screen_frame.m8_var.set("M8: 0")
-        self.on_screen_frame.m10_var.set("M10: 0")
-        self.on_screen_frame.m12_var.set("M12: 0")
-        self.on_screen_frame.all_sizes_var.set("All sizes: 0")
+    def was_reset_pressed(self):
+        # If reset button was pressed, return True and reset the event
+        # Otherwise, return False
+        if self.reset_event.is_set():
+            self.reset_event.clear()
+            return True
+        return False
 
-        # Update totals_frame values
-        self.totals_frame.m6_var.set("M6: 0")
-        self.totals_frame.m8_var.set("M8: 0")
-        self.totals_frame.m10_var.set("M10: 0")
-        self.totals_frame.m12_var.set("M12: 0")
-        self.totals_frame.all_sizes_var.set("All sizes: 0")
 
-        # (Optional) update internal values too if needed
-        self.on_screen_frame.values = zero_values
-        self.totals_frame.values = zero_values
-
-        self.current_values = zero_values
-        self.total_values = zero_values
 
     def update_counts(self, current_values, total_values):
         # Update the displayed values in the frames
@@ -181,8 +173,8 @@ class GUI(customtkinter.CTk):
         self.totals_frame.all_sizes_var.set(f"All sizes: {total_values[4]}")
 
 
-#current_values = [1, 2, 44, 2, 10]  # Example current values
-#total_values = [10, 20, 30, 40, -2]  # Example total values
+# current_values = [1, 2, 44, 2, 10]  # Example current values
+# total_values = [10, 20, 30, 40, -2]  # Example total values
 
-#app = GUI(current_values=current_values, total_values=total_values)
-#app.mainloop()
+# app = GUI(current_values=current_values, total_values=total_values)
+# app.mainloop()

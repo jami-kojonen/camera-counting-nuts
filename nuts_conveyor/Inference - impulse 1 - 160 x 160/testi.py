@@ -30,7 +30,7 @@ max_disappeared_frames = 10  # Montako framea objektia voi olla näkymättömän
 
 nut_classes = ["m6", "m8", "m10", "m12"]
 nut_count = {nut: 0 for nut in nut_classes}
-line_y = 300  # Laskulinjan y-koordinaatti (esim. kuljetinhihnalla)
+line_y = 600  # Laskulinjan y-koordinaatti (esim. kuljetinhihnalla)
 
 colors = [(255, 0, 0), (0, 255, 0), (255, 255, 0), (0, 0, 255)]
 

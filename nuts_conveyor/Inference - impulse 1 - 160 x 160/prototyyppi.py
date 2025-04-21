@@ -1,15 +1,27 @@
+import queue
+import threading
 import cv2
 import numpy as np
-import tensorflow as tf
-import uuid
 import time
-import threading
+import uuid
 import os
-import sys
+import tensorflow as tf
+from gui.GUI_module import GUI
 
+# Initialize a queue for communication between threads
+gui_queue = queue.Queue()
 
+# Parameters
+min_confidence = 0.1
+min_visible_area = 5
+max_tracking_distance = 50
+max_disappeared_frames = 10
+line_y = 600
+nut_classes = ["m6", "m8", "m10", "m12"]
+nut_count = {nut: 0 for nut in nut_classes}  # Total nut count
+colors = [(255, 0, 0), (0, 255, 0), (255, 255, 0), (0, 0, 255)]
 
-from gui.GUI_module import GUI  # Make sure this is your actual path
+tracked_nuts = []
 
 # Load TFLite model and labels
 here = os.path.dirname(os.path.realpath(__file__))
@@ -26,18 +38,6 @@ input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 out_scale, out_zero_point = output_details[0]['quantization']
 
-# Parameters
-min_confidence = 0.1
-min_visible_area = 5
-max_tracking_distance = 50
-max_disappeared_frames = 10
-line_y = 300
-
-colors = [(255, 0, 0), (0, 255, 0), (255, 255, 0), (0, 0, 255)]
-nut_classes = ["m6", "m8", "m10", "m12"]
-nut_count = {nut: 0 for nut in nut_classes}
-tracked_nuts = []
-
 class TrackedObject:
     def __init__(self, nut_type, position):
         self.id = str(uuid.uuid4())[:8]
@@ -47,9 +47,11 @@ class TrackedObject:
         self.last_seen = time.time()
         self.counted = False
 
+# Euclidean distance function to match or create new nut objects
 def euclidean(p1, p2):
     return np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
 
+# Function to match or create new tracked nut objects
 def match_or_create(nut_label, position):
     for nut in tracked_nuts:
         if nut.nut_type == nut_label and euclidean(nut.position, position) < max_tracking_distance:
@@ -61,6 +63,7 @@ def match_or_create(nut_label, position):
     tracked_nuts.append(new_nut)
     return new_nut
 
+# Preprocess input frame for inference
 def preprocess_frame(frame):
     resized = cv2.resize(frame, (160, 160))
     gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
@@ -73,25 +76,30 @@ def preprocess_frame(frame):
     input_frame = np.expand_dims(input_frame, axis=0)
     return input_frame
 
-def run_camera(gui):
+# Camera processing in a separate thread
+def run_camera(gui, gui_queue, stop_event):
+    # Initialize camera
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-    while True:
+    while not stop_event.is_set():
         ret, frame = cap.read()
         if not ret:
             break
 
+        # Create dictionary to keep track of visible nuts in this frame
         visible_now = {nut: 0 for nut in nut_classes}
+        
+        # Preprocess the frame for inference
         input_frame = preprocess_frame(frame)
-
         interpreter.set_tensor(input_details[0]['index'], input_frame)
         interpreter.invoke()
         output = interpreter.get_tensor(output_details[0]['index'])
         real_output = out_scale * (output.astype(np.float32) - out_zero_point)
         real_output = real_output[0]
 
+        # Scales to map model output to frame dimensions
         model_w, model_h = 20, 20
         x_scale = frame.shape[1] / model_w
         y_scale = frame.shape[0] / model_h
@@ -108,6 +116,7 @@ def run_camera(gui):
                 tracked = match_or_create(nut_label, (x, y))
                 visible_now[nut_label] += 1
 
+                # Check if the nut has crossed the counting line and hasn't been counted yet
                 if not tracked.counted and tracked.prev_position[1] < line_y <= tracked.position[1]:
                     nut_count[nut_label] += 1
                     tracked.counted = True
@@ -122,26 +131,56 @@ def run_camera(gui):
         cv2.line(frame, (0, line_y), (frame.shape[1], line_y), (0, 0, 255), 2)
         cv2.putText(frame, "Counting Line", (10, line_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
-        current = [visible_now[n] for n in nut_classes]
-        total = [nut_count[n] for n in nut_classes]
-        gui.update_counts(current + [sum(current)], total + [sum(total)])
+        # Put the current and total counts in the queue
+        gui_queue.put((visible_now, nut_count))
 
         cv2.imshow("Nut Detection", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+            stop_event.set()  # Signal the camera thread to stop
 
     cap.release()
     cv2.destroyAllWindows()
 
+# Function to update the GUI with data from the queue
+def update_gui_from_queue(gui, gui_queue):
+    try:
+        # Retrieve the data from the queue
+        visible_now, total = gui_queue.get_nowait()
+        current = [visible_now[n] for n in nut_classes]
+        total_values = [total[n] for n in nut_classes]
+        gui.update_counts(current + [sum(current)], total_values + [sum(total_values)])
+    except queue.Empty:
+        pass  # No new data in the queue yet
 
-
+# Main execution loop
 if __name__ == "__main__":
     gui = GUI(current_values=[0, 0, 0, 0, 0], total_values=[0, 0, 0, 0, 0])
 
-    # Start the camera in a separate thread instead
-    cam_thread = threading.Thread(target=run_camera, args=(gui,), daemon=True)
+    # Flag to indicate when to stop the GUI loop
+    running = True
+    stop_event = threading.Event()  # Event to signal stopping the camera thread
+
+    def stop_gui():
+        global running
+        running = False
+        stop_event.set()  # Signal the camera thread to stop
+        gui.quit()
+
+    # Start the camera thread as soon as the program runs (before reset)
+    cam_thread = threading.Thread(target=run_camera, args=(gui, gui_queue, stop_event), daemon=True)
     cam_thread.start()
 
-    # GUI must be run on main thread!
-    gui.mainloop()
+    # GUI must be run on main thread
+    while running:
+        # Update the GUI's state only if the window is still open
+        if gui.winfo_exists():
+            gui.update()
 
+            # Periodically check for new data from the camera thread
+            update_gui_from_queue(gui, gui_queue)
+
+            # Allow Tkinter to refresh and process events
+            gui.after(100, lambda: None)
+
+    # Clean up when quitting
+    cv2.destroyAllWindows()
