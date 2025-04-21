@@ -27,11 +27,15 @@ output_details = interpreter.get_output_details()
 out_scale, out_zero_point = output_details[0]['quantization']
 
 # Parameters
+# You can adjust these for possible better performance
+# line_y is the distance of the counting line from the top of the screen
+# max_tracking_distance changes how fast you can move the conveyor
+# smaller distance means the nut gets counted as a new one more sensitively
 min_confidence = 0.1
 min_visible_area = 5
 max_tracking_distance = 50
 max_disappeared_frames = 10
-line_y = 600
+line_y = 400
 
 colors = [(255, 0, 0), (0, 255, 0), (255, 255, 0), (0, 0, 255)]
 nut_classes = ["m6", "m8", "m10", "m12"]
@@ -146,26 +150,32 @@ def run_camera(gui):
         total = [nut_count[n] for n in nut_classes]
         gui.update_counts(current + [sum(current)], total + [sum(total)])
         
-        # Check if the reset button was pressed
-            # Reset the counts in the GUI and the nut_count dictionary
-        if gui.was_reset_pressed():
-            zero_values = [0, 0, 0, 0, 0]
-            gui.update_counts(zero_values, zero_values)
-            for nut in nut_classes:
-                nut_count[nut] = 0
-
         cv2.imshow("Nut Detection", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
 
+    # Free resources and stop the program if "q" is pressed
     cap.release()
     cv2.destroyAllWindows()
+    gui.destroy()
 
 
 
 if __name__ == "__main__":
     gui = GUI(current_values=[0, 0, 0, 0, 0], total_values=[0, 0, 0, 0, 0])
+
+    def reset_everything():
+        # Reset the counts in the GUI and the nut_count dictionary holding the actual values
+        zero_values = [0, 0, 0, 0, 0]
+        gui.update_counts(zero_values, zero_values)
+        for nut in nut_classes:
+            nut_count[nut] = 0
+
+    # We pass this reset function as an argument for the gui class to use
+    # We don't call the reset function here, it gets executed with each press of reset
+    gui.set_reset_callback(reset_everything)
+        
 
     # Start the camera in a separate thread instead
     cam_thread = threading.Thread(target=run_camera, args=(gui,), daemon=True)

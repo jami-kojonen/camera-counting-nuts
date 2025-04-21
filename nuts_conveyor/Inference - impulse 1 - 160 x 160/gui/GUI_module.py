@@ -1,3 +1,4 @@
+import threading
 import customtkinter
 
 class title_frame(customtkinter.CTkFrame):
@@ -105,7 +106,7 @@ class button_frame(customtkinter.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        self.reset_button = customtkinter.CTkButton(self, text="Reset", command=master.button_callback)
+        self.reset_button = customtkinter.CTkButton(self, text="Reset", command=master.on_reset_press)
         self.reset_button.grid(row=0, column=0, padx=10, pady=(10, 10), sticky="nsew")
 
 
@@ -114,8 +115,11 @@ class GUI(customtkinter.CTk):
         super().__init__()
 
         self.title("Nut counting software")
-        self.geometry("800x600")
+        self.geometry("400x600")
         self.configure(bg="#2E2E2E")
+
+        # This will be set by the main program
+        self.reset_callback_function = None
 
         self.current_values = current_values if current_values is not None else [0, 0, 0, 0]
         self.total_values = total_values if total_values is not None else [0, 0, 0, 0]
@@ -140,31 +144,17 @@ class GUI(customtkinter.CTk):
         self.totals_frame = totals_frame(self, values=self.total_values)
         self.totals_frame.grid(row=1, column=1, sticky="nsew")
 
-    def button_callback(self):
-        # This method will be called when the button is pressed
-        # Reset values to 0
-        zero_values = [0, 0, 0, 0, 0]
+    def set_reset_callback(self, callback_function):
+        # This is used to pass an external function to this class
+        # The external function will decide the behaviour of the reset button
+        self.reset_callback_function = callback_function
 
-        # Update on_screen_frame values
-        self.on_screen_frame.m6_var.set("M6: 0")
-        self.on_screen_frame.m8_var.set("M8: 0")
-        self.on_screen_frame.m10_var.set("M10: 0")
-        self.on_screen_frame.m12_var.set("M12: 0")
-        self.on_screen_frame.all_sizes_var.set("All sizes: 0")
-
-        # Update totals_frame values
-        self.totals_frame.m6_var.set("M6: 0")
-        self.totals_frame.m8_var.set("M8: 0")
-        self.totals_frame.m10_var.set("M10: 0")
-        self.totals_frame.m12_var.set("M12: 0")
-        self.totals_frame.all_sizes_var.set("All sizes: 0")
-
-        # (Optional) update internal values too if needed
-        self.on_screen_frame.values = zero_values
-        self.totals_frame.values = zero_values
-
-        self.current_values = zero_values
-        self.total_values = zero_values
+    def on_reset_press(self):
+        # This gets executed whenever the actual reset button is pressed
+        # This does whatever the callback function has been set to by the main program
+        # If no reset callback has been set, do nothing
+        if self.reset_callback_function:
+            self.reset_callback_function()
 
     def update_counts(self, current_values, total_values):
         # Update the displayed values in the frames
