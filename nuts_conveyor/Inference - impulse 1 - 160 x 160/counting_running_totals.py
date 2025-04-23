@@ -5,11 +5,8 @@ import uuid
 import time
 import threading
 import os
-import sys
 
-
-
-from gui.GUI_module import GUI  # Make sure this is your actual path
+from gui.GUI_module import GUI
 
 # Load TFLite model and labels
 here = os.path.dirname(os.path.realpath(__file__))
@@ -27,14 +24,20 @@ output_details = interpreter.get_output_details()
 out_scale, out_zero_point = output_details[0]['quantization']
 
 # Parameters
+# You can adjust these for possible better performance
+# line_y is the distance of the counting line from the top of the screen
+# max_tracking_distance changes how fast you can move the conveyor
+# smaller distance means the nut gets counted as a new one more sensitively
 min_confidence = 0.1
 min_visible_area = 5
 max_tracking_distance = 50
 max_disappeared_frames = 10
-line_y = 300
+line_y = 400
 
 colors = [(255, 0, 0), (0, 255, 0), (255, 255, 0), (0, 0, 255)]
 nut_classes = ["m6", "m8", "m10", "m12"]
+# Create a dictionary to keep track of the total nuts and their counts
+# The nut counts are initialized to 0
 nut_count = {nut: 0 for nut in nut_classes}
 tracked_nuts = []
 
@@ -51,8 +54,13 @@ def euclidean(p1, p2):
     return np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
 
 def match_or_create(nut_label, position):
+    # Check if the nut is already being tracked and if it's within the tracking distance
+    # in that case update its position and last seen time
+    # and return the tracked nut
+    # otherwise create a new tracked nut and return it
+
     for nut in tracked_nuts:
-        if nut.nut_type == nut_label and euclidean(nut.position, position) < max_tracking_distance:
+        if nut.nut_type == nut_label and euclidean(nut.position, position) < max_tracking_distance: 
             nut.prev_position = nut.position
             nut.position = position
             nut.last_seen = time.time()
@@ -62,6 +70,9 @@ def match_or_create(nut_label, position):
     return new_nut
 
 def preprocess_frame(frame):
+    # Its important to resize the frame to the same size as the model input
+    # and convert it to grayscale
+    # The model input size is 160x160 in this case
     resized = cv2.resize(frame, (160, 160))
     gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
     if input_details[0]['dtype'] == np.int8:
@@ -74,6 +85,8 @@ def preprocess_frame(frame):
     return input_frame
 
 def run_camera(gui):
+    # Initialize the camera
+    # Change the camera index if needed (Usually 0 for built-in, 1 for external)
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -82,6 +95,9 @@ def run_camera(gui):
         ret, frame = cap.read()
         if not ret:
             break
+
+        # Create dictionary to keep track of visible nuts
+        # and their counts in the current frame
 
         visible_now = {nut: 0 for nut in nut_classes}
         input_frame = preprocess_frame(frame)
@@ -108,6 +124,9 @@ def run_camera(gui):
                 tracked = match_or_create(nut_label, (x, y))
                 visible_now[nut_label] += 1
 
+
+                # Check if the nut has crossed the counting line and hasn't been counted yet
+                # Then count it and mark it as counted
                 if not tracked.counted and tracked.prev_position[1] < line_y <= tracked.position[1]:
                     nut_count[nut_label] += 1
                     tracked.counted = True
@@ -122,21 +141,41 @@ def run_camera(gui):
         cv2.line(frame, (0, line_y), (frame.shape[1], line_y), (0, 0, 255), 2)
         cv2.putText(frame, "Counting Line", (10, line_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
+        # Update the GUI with the current and total counts
+        # The current counts are the number of visible nuts in the current frame
+        # The total counts are the total number of nuts counted which have crossed the counting line so far
+        # The update_counts method takes two lists of length 5 as arguments
+        # We need to access the values from the visible_now and nut_count dictionaries to pass them to the method
         current = [visible_now[n] for n in nut_classes]
         total = [nut_count[n] for n in nut_classes]
         gui.update_counts(current + [sum(current)], total + [sum(total)])
-
+        
         cv2.imshow("Nut Detection", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
+
+    # Free resources and stop the program if "q" is pressed
     cap.release()
     cv2.destroyAllWindows()
+    gui.destroy()
 
 
 
 if __name__ == "__main__":
     gui = GUI(current_values=[0, 0, 0, 0, 0], total_values=[0, 0, 0, 0, 0])
+
+    def reset_everything():
+        # Reset the counts in the GUI and the nut_count dictionary holding the actual values
+        zero_values = [0, 0, 0, 0, 0]
+        gui.update_counts(zero_values, zero_values)
+        for nut in nut_classes:
+            nut_count[nut] = 0
+
+    # We pass this reset function as an argument for the gui class to use
+    # We don't call the reset function here, it gets executed with each press of reset
+    gui.set_reset_callback(reset_everything)
+        
 
     # Start the camera in a separate thread instead
     cam_thread = threading.Thread(target=run_camera, args=(gui,), daemon=True)
