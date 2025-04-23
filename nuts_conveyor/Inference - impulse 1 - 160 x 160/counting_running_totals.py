@@ -5,9 +5,6 @@ import uuid
 import time
 import threading
 import os
-import sys
-
-
 
 from gui.GUI_module import GUI
 
@@ -73,6 +70,9 @@ def match_or_create(nut_label, position):
     return new_nut
 
 def preprocess_frame(frame):
+    # Its important to resize the frame to the same size as the model input
+    # and convert it to grayscale
+    # The model input size is 160x160 in this case
     resized = cv2.resize(frame, (160, 160))
     gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
     if input_details[0]['dtype'] == np.int8:
