@@ -85,8 +85,10 @@ def match_or_create(nut_label, position):
         return new_nut
 
 def run_tflite_inference(frame):
-    input_data = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # Its important to resize the input data to the model's expected input size
+    # The model expects 160x160 input in this case
     input_data = cv2.resize(input_data, (160, 160))
+    input_data = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     input_data = input_data.astype(np.float32)
     input_data = (input_data - 127.5) / 127.5
     input_data = np.round(input_data * 127.5).astype(np.int8)
